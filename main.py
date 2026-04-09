@@ -44,6 +44,6 @@ output['GMM'] = gmm_labels
 output['AutoEncoder'] = ae_labels
 output['MLP'] = mlp_preds
 
-output.to_csv("output_results.csv", index=False)
+output.to_csv("outputr_results.csv", index=False)
 
 print("DONE!")
