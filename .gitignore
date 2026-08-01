@@ -1,0 +1,28 @@
+# Python bytecode
+**/__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Output files (tự sinh, không cần commit)
+output/
+input/customer_rfm.csv
+input/customer_rfm_small.csv
+
+# Temporary MS Office files
+~$*
+~WRL*
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

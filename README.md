@@ -30,6 +30,14 @@ CT466_DC22V7N506_NguyenKhanhDuy/
 ├── main.py                    # Entry point — chạy toàn bộ pipeline
 ├── prepare_data.py            # Tạo CSV từ file Excel thô
 ├── preprocessing.py           # Tiền xử lý: log, scale, PCA
+├── input/                     # Thư mục dữ liệu đầu vào
+│   ├── data_small.xlsx        # Dữ liệu giao dịch (30 KH — demo)
+│   ├── data_large.xlsx        # Dữ liệu giao dịch đầy đủ (4338 KH)
+│   ├── customer_rfm_small.csv # RFM tập nhỏ đã tính
+│   └── customer_rfm.csv       # RFM tập đầy đủ đã tính
+├── output/                    # Thư mục kết quả & báo cáo đầu ra
+│   ├── output_results.csv     # Kết quả phân cụm
+│   └── *.docx                 # Báo cáo và tài liệu chi tiết
 ├── models/
 │   ├── kmeans_model.py        # K-Means & K-Means++
 │   ├── dbscan_model.py        # DBSCAN
@@ -37,11 +45,8 @@ CT466_DC22V7N506_NguyenKhanhDuy/
 │   ├── gmm_model.py           # Gaussian Mixture Model
 │   ├── autoencoder_kmeans.py  # PCA + K-Means
 │   └── mlp_model.py           # MLP Classifier
-├── utils/
-│   └── evaluation.py          # Silhouette Score
-├── data_small.xlsx            # Dữ liệu giao dịch (30 KH — demo)
-├── data_large.xlsx            # Dữ liệu giao dịch đầy đủ (4338 KH)
-└── customer_rfm_small.csv     # RFM đã tính (tự sinh nếu chưa có)
+└── utils/
+    └── evaluation.py          # Silhouette Score
 ```
 
 ---
@@ -61,7 +66,7 @@ CT466_DC22V7N506_NguyenKhanhDuy/
 python main.py
 ```
 
-> `main.py` tự động tạo `customer_rfm_small.csv` từ `data_small.xlsx` nếu chưa có.
+> `main.py` tự động tạo `input/customer_rfm_small.csv` từ `input/data_small.xlsx` nếu chưa có.
 
 ### Cách 2 — Tạo dữ liệu thủ công rồi chạy
 
@@ -81,11 +86,11 @@ python main.py
 Mở [`config.py`](config.py) và sửa dòng:
 
 ```python
-INPUT_FILE: str = "customer_rfm_small.csv"   # ← đổi sang "customer_rfm.csv" để dùng tập đầy đủ
+INPUT_FILE: str = os.path.join("input", "customer_rfm_small.csv")   # ← đổi sang "input/customer_rfm.csv" để dùng tập đầy đủ
 ```
 
 ---
 
 ## Kết quả
 
-Sau khi chạy, file `output_results.csv` sẽ chứa nhãn phân cụm từ tất cả 7 model cho mỗi khách hàng.
+Sau khi chạy, file `output/output_results.csv` sẽ chứa nhãn phân cụm từ tất cả 7 model cho mỗi khách hàng.

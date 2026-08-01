@@ -1,16 +1,3 @@
-"""
-main.py
--------
-Điểm vào (entry point) của pipeline phân cụm khách hàng RFM.
-
-Quy trình:
-    1. Tự động tạo CSV từ Excel nếu chưa tồn tại (gọi prepare_data)
-    2. Tiền xử lý dữ liệu RFM từ CSV
-    3. Chạy 6 model phân cụm + 1 MLP classifier
-    4. Đánh giá từng model bằng Silhouette Score
-    5. Lưu toàn bộ kết quả ra file CSV
-"""
-
 import os
 import sys
 
@@ -87,6 +74,10 @@ def save_results(
         output[model_name] = labels
     output["MLP"] = mlp_labels
 
+    out_dir = os.path.dirname(output_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+
     output.to_csv(output_path, index=False)
     print(f"\nKết quả đã lưu tại: {output_path}")
 
@@ -95,8 +86,8 @@ def ensure_csv_exists(csv_path: str) -> None:
     """Tự động tạo file CSV từ Excel nếu chưa tồn tại.
 
     Gọi prepare_data.py với tham số phù hợp dựa trên tên file CSV:
-        - customer_rfm_small.csv  → prepare_data.py --small
-        - customer_rfm.csv        → prepare_data.py
+        - input/customer_rfm_small.csv  → prepare_data.py --small
+        - input/customer_rfm.csv        → prepare_data.py
 
     Args:
         csv_path: Đường dẫn file CSV cần kiểm tra.
@@ -104,13 +95,13 @@ def ensure_csv_exists(csv_path: str) -> None:
     if os.path.exists(csv_path):
         return
 
-    print(f"⚠️  '{csv_path}' chưa tồn tại — tự động tạo từ Excel...\n")
+    print(f"  '{csv_path}' chưa tồn tại — tự động tạo từ Excel...\n")
     from prepare_data import prepare_dataset
 
     if "small" in csv_path:
-        prepare_dataset(input_xlsx="data_small.xlsx", output_csv=csv_path)
+        prepare_dataset(input_xlsx=os.path.join("input", "data_small.xlsx"), output_csv=csv_path)
     else:
-        prepare_dataset(input_xlsx="data_large.xlsx", output_csv=csv_path)
+        prepare_dataset(input_xlsx=os.path.join("input", "data_large.xlsx"), output_csv=csv_path)
 
     print()
 
