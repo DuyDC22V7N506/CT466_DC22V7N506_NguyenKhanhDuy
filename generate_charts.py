@@ -18,7 +18,6 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
 from config import RFM_FEATURES, INPUT_FILE, PCA_COMPONENTS, RANDOM_STATE, AUTOENCODER_LATENT_DIM
 
-# ── Thư mục xuất ảnh ─────────────────────────────────────────────────────────
 OUT_DIR = os.path.join(ROOT, "output", "charts")
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -29,19 +28,19 @@ plt.rcParams.update({
     "axes.labelsize":   11,
     "xtick.labelsize":  9,
     "ytick.labelsize":  9,
-    "figure.dpi":       180,        # Độ phân giải cao — đẹp khi chèn Word
+    "figure.dpi":       180,      
     "savefig.dpi":      180,
     "savefig.bbox":     "tight",
     "savefig.facecolor": "white",
 })
 
 CLUSTER_COLORS = {
-    0: "#4C72B0",   # Xanh dương
-    1: "#DD8452",   # Cam
-    2: "#55A868",   # Xanh lá
-    3: "#C44E52",   # Đỏ
-    4: "#8172B2",   # Tím
-   -1: "#AAAAAA",   # Xám — nhiễu DBSCAN
+    0: "#4C72B0",   
+    1: "#DD8452",  
+    2: "#55A868",   
+    3: "#C44E52",   
+    4: "#8172B2",  
+   -1: "#AAAAAA",   
 }
 
 CLUSTER_LABELS = {
@@ -53,11 +52,9 @@ CLUSTER_LABELS = {
    -1: "Nhiễu (Noise)",
 }
 
-print(f"Đang nạp dữ liệu từ: {INPUT_FILE}")
 df_results = pd.read_csv(os.path.join(ROOT, "output", "output_results.csv"))
 df_rfm     = pd.read_csv(os.path.join(ROOT, INPUT_FILE))
 
-# — Tiền xử lý: log-transform → scale → PCA (trục vẽ scatter)
 df_log = df_rfm.copy()
 for col in RFM_FEATURES:
     df_log[col] = np.log1p(df_log[col])
@@ -71,7 +68,6 @@ ev        = pca_main.explained_variance_ratio_
 xlabel_pca = f"PC1 ({ev[0]*100:.1f}% phương sai)"
 ylabel_pca = f"PC2 ({ev[1]*100:.1f}% phương sai)"
 
-# — Latent space riêng cho AutoEncoder (PCA 2D từ X_scaled)
 pca_ae   = PCA(n_components=AUTOENCODER_LATENT_DIM, random_state=RANDOM_STATE)
 X_latent = pca_ae.fit_transform(X_scaled)
 ev_ae    = pca_ae.explained_variance_ratio_
@@ -79,7 +75,6 @@ xlabel_ae = f"Latent-1 ({ev_ae[0]*100:.1f}%)"
 ylabel_ae = f"Latent-2 ({ev_ae[1]*100:.1f}%)"
 
 def _make_legend(unique_labels: np.ndarray) -> list:
-    """Tạo danh sách legend patch theo thứ tự: cụm 0,1,2,... rồi noise (-1) cuối."""
     ordered = sorted([l for l in unique_labels if l != -1])
     if -1 in unique_labels:
         ordered.append(-1)
@@ -88,7 +83,6 @@ def _make_legend(unique_labels: np.ndarray) -> list:
                        label=CLUSTER_LABELS.get(l, f"Cụm {l}"))
         for l in ordered
     ]
-
 
 def plot_scatter(
     X: np.ndarray,
@@ -99,7 +93,6 @@ def plot_scatter(
     filename: str,
     subtitle: str = "",
 ) -> None:
-    """Vẽ scatter plot phân cụm 2D và lưu ra file PNG."""
     unique_labels = np.unique(labels)
     fig, ax = plt.subplots(figsize=(7, 5))
 
@@ -116,7 +109,6 @@ def plot_scatter(
             linewidths=0.4,
         )
 
-    # Tâm cụm (chỉ cho các cụm hợp lệ)
     for lbl in unique_labels:
         if lbl == -1:
             continue
@@ -142,8 +134,6 @@ def plot_scatter(
     out_path = os.path.join(OUT_DIR, filename)
     fig.savefig(out_path)
     plt.close(fig)
-    print(f"  ✓ Đã lưu: {out_path}")
-
 
 def compute_silhouette(X: np.ndarray, labels: np.ndarray) -> float | None:
     labels_arr = np.asarray(labels)
@@ -155,30 +145,29 @@ def compute_silhouette(X: np.ndarray, labels: np.ndarray) -> float | None:
 models = [
     # (cột trong CSV,   X dùng để vẽ,  xlabel,       ylabel,       tên file,                tiêu đề)
     ("KMeans",      X_pca,    xlabel_pca, ylabel_pca, "hinh_4_1_kmeans.png",
-     "Hình 4.1 – Kết quả phân cụm K-Means"),
+     "Hình 1 – Kết quả phân cụm K-Means"),
 
     ("KMeans++",    X_pca,    xlabel_pca, ylabel_pca, "hinh_4_2_kmeans_pp.png",
-     "Hình 4.2 – Kết quả phân cụm K-Means++"),
+     "Hình 2 – Kết quả phân cụm K-Means++"),
 
     ("GMM",         X_pca,    xlabel_pca, ylabel_pca, "hinh_4_3_gmm.png",
-     "Hình 4.3 – Kết quả phân cụm GMM"),
+     "Hình 3 – Kết quả phân cụm GMM"),
 
     ("Hierarchical",X_pca,    xlabel_pca, ylabel_pca, "hinh_4_4_hierarchical.png",
-     "Hình 4.4 – Kết quả phân cụm Hierarchical (Agglomerative)"),
+     "Hình 4 – Kết quả phân cụm Hierarchical (Agglomerative)"),
 
     ("DBSCAN",      X_pca,    xlabel_pca, ylabel_pca, "hinh_4_5_dbscan.png",
-     "Hình 4.5 – Kết quả phân cụm DBSCAN"),
+     "Hình 5 – Kết quả phân cụm DBSCAN"),
 
     ("AutoEncoder", X_latent, xlabel_ae,  ylabel_ae,  "hinh_4_6_autoencoder.png",
-     "Hình 4.6 – Kết quả phân cụm AutoEncoder (PCA + K-Means)"),
+     "Hình 6 – Kết quả phân cụm AutoEncoder (PCA + K-Means)"),
 
     ("MLP",         X_pca,    xlabel_pca, ylabel_pca, "hinh_4_7_mlp.png",
-     "Hình 4.7 – Kết quả phân cụm MLP (Học có giám sát – nhãn giả)"),
+     "Hình 7 – Kết quả phân cụm MLP (Học có giám sát – nhãn giả)"),
 ]
 
 silhouette_scores: dict[str, float | None] = {}
 
-print("\n=== Vẽ biểu đồ Scatter Plot phân cụm ===")
 for col, X_plot, xl, yl, fname, title in models:
     labels = df_results[col].to_numpy()
     score  = compute_silhouette(X_plot, labels)
@@ -187,13 +176,11 @@ for col, X_plot, xl, yl, fname, title in models:
     subtitle = f"Silhouette Score: {score:.4f}" if score is not None else "Silhouette Score: N/A"
     plot_scatter(X_plot, labels, title, xl, yl, fname, subtitle=subtitle)
 
-print("\n=== Vẽ biểu đồ So sánh Silhouette Score ===")
-
 model_names  = list(silhouette_scores.keys())
 score_values = [v if v is not None else 0.0 for v in silhouette_scores.values()]
 valid_mask   = [v is not None for v in silhouette_scores.values()]
 
-# Màu cột: highlight model tốt nhất bằng màu vàng đậm
+
 bar_colors = []
 best_idx   = int(np.argmax(score_values))
 for i, is_valid in enumerate(valid_mask):
@@ -231,7 +218,7 @@ ax.axhline(0.25, color="#F0A033", linestyle=":",  linewidth=0.9, alpha=0.7, labe
 
 ax.set_ylim(0, max(score_values) * 1.20 + 0.05)
 ax.set_ylabel("Silhouette Score")
-ax.set_title("Hình 4.8 – So sánh Silhouette Score giữa các thuật toán phân cụm",
+ax.set_title("Hình 8 – So sánh Silhouette Score giữa các thuật toán phân cụm",
              pad=12)
 ax.set_xlabel("Thuật toán")
 ax.legend(fontsize=9, framealpha=0.85, edgecolor="#cccccc")
@@ -247,14 +234,5 @@ for i, bar in enumerate(bars):
 out_path = os.path.join(OUT_DIR, "hinh_4_8_silhouette_comparison.png")
 fig.savefig(out_path)
 plt.close(fig)
-print(f"  ✓ Đã lưu: {out_path}")
 
-print("\n" + "="*60)
-print(f"HOÀN THÀNH! Toàn bộ ảnh đã lưu tại: {OUT_DIR}")
-print("="*60)
-print("\nDanh sách Silhouette Score:")
-for name, score in silhouette_scores.items():
-    tag = " ← TỐT NHẤT" if name == model_names[best_idx] else ""
-    val = f"{score:.4f}" if score is not None else "N/A (DBSCAN — toàn nhiễu)"
-    print(f"  {name:<14} {val}{tag}")
 print()
