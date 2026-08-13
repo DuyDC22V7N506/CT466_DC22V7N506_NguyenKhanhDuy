@@ -1,7 +1,6 @@
 import os
 import sys
 
-# Đảm bảo stdout dùng UTF-8 trên Windows để tránh UnicodeEncodeError
 sys.stdout.reconfigure(encoding="utf-8")
 
 import numpy as np
@@ -17,23 +16,10 @@ from models.mlp_model import run_mlp
 from preprocessing import load_and_preprocess_rfm
 from utils.evaluation import evaluate_model
 
-
 def run_all_models(
     X_pca: np.ndarray,
     X_scaled: np.ndarray,
 ) -> tuple[dict[str, np.ndarray], np.ndarray]:
-    """Chạy toàn bộ pipeline phân cụm và đánh giá kết quả.
-
-    Args:
-        X_pca: Dữ liệu 2D sau PCA — đầu vào cho hầu hết models.
-        X_scaled: Dữ liệu 3D đã chuẩn hóa — đầu vào cho AutoEncoder.
-
-    Returns:
-        Tuple gồm:
-            - cluster_labels (dict): Ánh xạ tên model → mảng nhãn cụm.
-            - mlp_labels (np.ndarray): Nhãn dự đoán từ MLP.
-    """
-    # ── Chạy các model phân cụm ──────────────────────────────────────────────
     cluster_runners: dict[str, callable] = {
         "KMeans":      lambda: run_kmeans(X_pca),
         "KMeans++":    lambda: run_kmeans_pp(X_pca),
@@ -49,11 +35,9 @@ def run_all_models(
         cluster_labels[model_name] = labels
         evaluate_model(X_pca, labels, model_name)
 
-    # ── MLP dùng pseudo-label từ KMeans ──────────────────────────────────────
     mlp_labels = run_mlp(X_pca, pseudo_labels=cluster_labels["KMeans"])
 
     return cluster_labels, mlp_labels
-
 
 def save_results(
     df_rfm: pd.DataFrame,
@@ -61,14 +45,6 @@ def save_results(
     mlp_labels: np.ndarray,
     output_path: str = OUTPUT_FILE,
 ) -> None:
-    """Gắn nhãn phân cụm vào DataFrame và lưu ra file CSV.
-
-    Args:
-        df_rfm: DataFrame RFM gốc làm nền cho output.
-        cluster_labels: Dict ánh xạ tên model → mảng nhãn cụm.
-        mlp_labels: Mảng nhãn từ MLP classifier.
-        output_path: Đường dẫn file CSV đầu ra. Mặc định lấy từ config.
-    """
     output = df_rfm.copy()
     for model_name, labels in cluster_labels.items():
         output[model_name] = labels
@@ -83,15 +59,6 @@ def save_results(
 
 
 def ensure_csv_exists(csv_path: str) -> None:
-    """Tự động tạo file CSV từ Excel nếu chưa tồn tại.
-
-    Gọi prepare_data.py với tham số phù hợp dựa trên tên file CSV:
-        - input/customer_rfm_small.csv  → prepare_data.py --small
-        - input/customer_rfm.csv        → prepare_data.py
-
-    Args:
-        csv_path: Đường dẫn file CSV cần kiểm tra.
-    """
     if os.path.exists(csv_path):
         return
 
@@ -107,8 +74,6 @@ def ensure_csv_exists(csv_path: str) -> None:
 
 
 def main() -> None:
-    """Điểm vào chính của pipeline phân cụm RFM."""
-    # Tự động sinh CSV nếu chưa có (không cần chạy prepare_data.py thủ công)
     ensure_csv_exists(INPUT_FILE)
 
     print(f"=== Đang đọc và xử lý dữ liệu từ '{INPUT_FILE}' ===\n")

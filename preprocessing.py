@@ -24,6 +24,7 @@ def reduce_dimensions(X_scaled: np.ndarray) -> np.ndarray:
     return pca.fit_transform(X_scaled)
 
 def load_and_preprocess_rfm(
+
     file_path: str,
 ) -> tuple[np.ndarray, np.ndarray, pd.DataFrame]:
     df_rfm = load_rfm_data(file_path)

@@ -6,7 +6,11 @@ import pandas as pd
 sys.stdout.reconfigure(encoding='utf-8')
 
 def prepare_dataset(input_xlsx: str, output_csv: str) -> None:
-    
+    if not os.path.exists(input_xlsx):
+        print(f"Lỗi: Không tìm thấy file dữ liệu '{input_xlsx}'.")
+        print("Vui lòng kiểm tra lại file trong thư mục 'input/'.")
+        return
+
     print(f"Đang đọc '{input_xlsx}', vui lòng chờ...")
     df = pd.read_excel(input_xlsx)
 
@@ -45,17 +49,23 @@ def main() -> None:
     args = parser.parse_args()
 
     os.makedirs("input", exist_ok=True)
-    if args.small:
+
+    large_file = os.path.join("input", "data_large.xlsx")
+    small_file = os.path.join("input", "data_small.xlsx")
+
+    # Nếu truyền --small hoặc nếu không tìm thấy file data_large.xlsx thì dùng data_small.xlsx
+    if args.small or not os.path.exists(large_file):
         prepare_dataset(
-            input_xlsx=os.path.join("input", "data_small.xlsx"),
+            input_xlsx=small_file,
             output_csv=os.path.join("input", "customer_rfm_small.csv"),
         )
     else:
         prepare_dataset(
-            input_xlsx=os.path.join("input", "data_large.xlsx"),
+            input_xlsx=large_file,
             output_csv=os.path.join("input", "customer_rfm.csv"),
         )
 
 
 if __name__ == "__main__":
     main()
+

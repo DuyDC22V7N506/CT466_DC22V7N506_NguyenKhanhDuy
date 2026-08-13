@@ -1,2 +1,0 @@
-1. tóm lại ung dung của đề tài sau này có thể làm và phát triển lên hướng gì?
-2. CÓ thể kiểm chứng làm sao biết kết quả nó chạy ra là đúng hay sai?
