@@ -76,16 +76,12 @@ def ensure_csv_exists(csv_path: str) -> None:
 def main() -> None:
     ensure_csv_exists(INPUT_FILE)
 
-    print(f"=== Đang đọc và xử lý dữ liệu từ '{INPUT_FILE}' ===\n")
     X_pca, X_scaled, df_rfm = load_and_preprocess_rfm(INPUT_FILE)
 
-    print("=== Chạy các model phân cụm ===\n")
     cluster_labels, mlp_labels = run_all_models(X_pca, X_scaled)
 
-    print("\n=== Lưu kết quả ===")
     save_results(df_rfm, cluster_labels, mlp_labels)
 
-    print("\nDONE!")
 
 
 if __name__ == "__main__":
